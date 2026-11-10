@@ -5,7 +5,7 @@ export const PERSONAL_INFO = {
   title: 'Software Engineer',
   roleDescriptor: 'Systems, Algorithms & Web Engineering',
   email: 'developerjoy122@gmail.com',
-  github: 'https://github.com/developerjoy',
+  github: 'https://github.com/joydeepsasnal-dot',
   linkedin: 'https://linkedin.com/in/joydeep-sasmal',
   location: 'Kolkata, India / Remote Available',
   availabilityStatus: 'Available for new opportunities',
@@ -569,3 +569,4 @@ export const TESTIMONIALS: Testimonial[] = [
     avatarSeed: 'marcus',
   },
 ];
+

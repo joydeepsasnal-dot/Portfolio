@@ -55,8 +55,8 @@ export function resolveTaskDependencies(tasks: TaskNode[]): {
   }
 
   const order: string[] = [];
-  while (queue.length > 0) {
-    const current = queue.shift()!;
+  for (let head = 0; head < queue.length; head++) {
+    const current = queue[head];
     order.push(current);
 
     for (const neighbor of graph.get(current) || []) {
@@ -116,42 +116,30 @@ export function findNextStepOnGrid(
   gridHeight: number,
   obstacles: Set<string>
 ): GridPoint {
-  if (start.x === target.x && start.y === target.y) {
-    return start;
-  }
+  const valid = (p: GridPoint) => Number.isInteger(p.x) && Number.isInteger(p.y)
+    && p.x >= 0 && p.x < gridWidth && p.y >= 0 && p.y < gridHeight
+    && !obstacles.has(`${p.x},${p.y}`);
+  if (!valid(start) || !valid(target)) return start;
+  if (start.x === target.x && start.y === target.y) return start;
 
-  const directions = [
-    { x: 0, y: -1 }, // North
-    { x: 1, y: 0 },  // East
-    { x: 0, y: 1 },  // South
-    { x: -1, y: 0 }, // West
-  ];
-
-  let bestNext: GridPoint = start;
-  let minCost = Infinity;
-
-  for (const dir of directions) {
-    const nextX = start.x + dir.x;
-    const nextY = start.y + dir.y;
-
-    // Bounds check
-    if (nextX < 0 || nextX >= gridWidth || nextY < 0 || nextY >= gridHeight) {
-      continue;
-    }
-
-    const key = `${nextX},${nextY}`;
-    if (obstacles.has(key)) {
-      continue;
-    }
-
-    const cost = 1 + manhattanDistance(nextX, nextY, target.x, target.y);
-    if (cost < minCost) {
-      minCost = cost;
-      bestNext = { x: nextX, y: nextY };
+  // Breadth-first search guarantees a shortest route on this unweighted grid,
+  // including detours that initially move away from the target.
+  const queue: { point: GridPoint; first?: GridPoint }[] = [{ point: start }];
+  const visited = new Set([`${start.x},${start.y}`]);
+  const directions = [{ x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: -1, y: 0 }];
+  for (let i = 0; i < queue.length; i++) {
+    const { point, first } = queue[i];
+    for (const dir of directions) {
+      const next = { x: point.x + dir.x, y: point.y + dir.y };
+      const key = `${next.x},${next.y}`;
+      if (!valid(next) || visited.has(key)) continue;
+      const firstStep = first ?? next;
+      if (next.x === target.x && next.y === target.y) return firstStep;
+      visited.add(key);
+      queue.push({ point: next, first: firstStep });
     }
   }
-
-  return bestNext;
+  return start;
 }
 
 /**
@@ -180,3 +168,4 @@ export function validateContactForm(data: Partial<ContactFormData>): {
     errors,
   };
 }
+

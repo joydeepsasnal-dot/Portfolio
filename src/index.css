@@ -49,3 +49,6 @@ html {
 .animate-glow-mesh {
   animation: pulseGlow 8s ease-in-out infinite alternate;
 }
+
+
+section[id] { scroll-margin-top: 6rem; }

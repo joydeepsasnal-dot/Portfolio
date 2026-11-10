@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { TaskNode, resolveTaskDependencies, calculatePriorityWeight } from '../utils/engine';
 import { CheckCircle2, Clock, AlertTriangle, Plus, ArrowRight, ShieldCheck, Info, Trash2, ArrowUpDown } from 'lucide-react';
 
@@ -16,6 +16,7 @@ const INITIAL_TASKS: TaskNode[] = [
 ];
 
 export const TaskManagerDemo: React.FC<TaskManagerDemoProps> = ({ onOpenDoc }) => {
+  const nextTaskId = useRef(107);
   const [tasks, setTasks] = useState<TaskNode[]>(INITIAL_TASKS);
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [newTitle, setNewTitle] = useState<string>('');
@@ -50,7 +51,7 @@ export const TaskManagerDemo: React.FC<TaskManagerDemoProps> = ({ onOpenDoc }) =
     if (!newTitle.trim()) return;
 
     const newTask: TaskNode = {
-      id: `T-${Math.floor(100 + Math.random() * 900)}`,
+      id: `T-${nextTaskId.current++}`,
       title: newTitle.trim(),
       priority: newPriority,
       dependencies: newDep ? [newDep] : [],
@@ -375,3 +376,4 @@ export const TaskManagerDemo: React.FC<TaskManagerDemoProps> = ({ onOpenDoc }) =
     </div>
   );
 };
+

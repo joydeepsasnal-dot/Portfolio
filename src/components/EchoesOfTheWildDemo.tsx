@@ -55,8 +55,13 @@ export const EchoesOfTheWildDemo: React.FC<EchoesOfTheWildDemoProps> = ({ onOpen
     return new Set<string>(['5,3', '8,12', '13,4', '2,14', '14,14']);
   });
 
-  const handleCopyGameLink = () => {
-    navigator.clipboard.writeText(GAME_URL);
+  const handleCopyGameLink = async () => {
+    try {
+      await navigator.clipboard.writeText(GAME_URL);
+    } catch {
+      window.alert("Copy failed. Please select and copy the text manually.");
+      return;
+    }
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
   };
@@ -69,7 +74,7 @@ export const EchoesOfTheWildDemo: React.FC<EchoesOfTheWildDemoProps> = ({ onOpen
       const visited = new Set<string>();
       let iterations = 0;
 
-      while ((curr.x !== goal.x || curr.y !== goal.y) && iterations < 30) {
+      while ((curr.x !== goal.x || curr.y !== goal.y) && iterations < GRID_SIZE * GRID_SIZE) {
         iterations++;
         const next = findNextStepOnGrid(curr, goal, GRID_SIZE, GRID_SIZE, obstacles);
         const key = `${next.x},${next.y}`;
@@ -114,7 +119,7 @@ export const EchoesOfTheWildDemo: React.FC<EchoesOfTheWildDemoProps> = ({ onOpen
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (activeTab !== 'simulator') return;
+      if (activeTab !== 'simulator' || document.activeElement !== canvasRef.current) return;
       let dx = 0;
       let dy = 0;
 
@@ -498,7 +503,8 @@ export const EchoesOfTheWildDemo: React.FC<EchoesOfTheWildDemoProps> = ({ onOpen
                   ref={canvasRef}
                   width={480}
                   height={480}
-                  onClick={handleCanvasClick}
+                  tabIndex={0}
+                  onClick={(event) => { event.currentTarget.focus(); handleCanvasClick(event); }}
                   className="w-full max-w-[420px] aspect-square cursor-crosshair block"
                   aria-label="Interactive 2D wilderness grid canvas"
                 />
@@ -571,3 +577,4 @@ export const EchoesOfTheWildDemo: React.FC<EchoesOfTheWildDemoProps> = ({ onOpen
     </div>
   );
 };
+

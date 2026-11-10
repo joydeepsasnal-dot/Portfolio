@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Project, TechnicalDoc } from '../types';
 import { PROJECTS } from '../data/portfolioData';
 import { X, Copy, Check, Terminal, Cpu, FileCode2, Gauge, ShieldAlert, ArrowRight } from 'lucide-react';
@@ -18,18 +18,52 @@ export const TechnicalDocsModal: React.FC<TechnicalDocsModalProps> = ({
   const [activeTab, setActiveTab] = useState<'architecture' | 'code' | 'benchmarks' | 'challenges'>('architecture');
   const [copiedSnippetIndex, setCopiedSnippetIndex] = useState<number | null>(null);
 
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    dialogRef.current?.focus();
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { event.preventDefault(); onClose(); }
+      if (event.key !== 'Tab') return;
+      const items = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>(
+        'button, a[href], input, select, textarea, [tabindex="0"]'
+      ) ?? []).filter((item) => !item.hasAttribute('disabled') && item.getClientRects().length > 0);
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (!first) { event.preventDefault(); return; }
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === dialogRef.current)) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === dialogRef.current)) {
+        event.preventDefault(); first.focus();
+      }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleKey);
+      previousFocus?.focus();
+    };
+  }, [onClose]);
+
   const currentProject = PROJECTS.find((p) => p.id === selectedProjectId) || PROJECTS[0];
   const doc = currentProject.technicalDoc;
 
-  const handleCopyCode = (code: string, idx: number) => {
-    navigator.clipboard.writeText(code);
+  const handleCopyCode = async (code: string, idx: number) => {
+    try {
+      await navigator.clipboard.writeText(code);
+    } catch {
+      window.alert("Copy failed. Please select and copy the text manually.");
+      return;
+    }
     setCopiedSnippetIndex(idx);
     setTimeout(() => setCopiedSnippetIndex(null), 2000);
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-stone-200 overflow-hidden">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Technical documentation" tabIndex={-1} className="bg-white rounded-3xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-stone-200 overflow-hidden">
         {/* Modal Top Bar */}
         <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50/80">
           <div className="flex items-center gap-3">
@@ -310,3 +344,4 @@ export const TechnicalDocsModal: React.FC<TechnicalDocsModalProps> = ({
     </div>
   );
 };
+
