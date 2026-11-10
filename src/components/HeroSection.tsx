@@ -78,8 +78,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
 
           {/* Floating Blurb Right: "Passionate about low-level memory efficiency..." */}
-          <div className="sm:absolute sm:right-4 sm:top-28 z-20 max-w-xs mb-6 sm:mb-0 text-center sm:text-right hidden sm:block">
-            <p className="text-sm md:text-base text-stone-700 font-normal leading-relaxed bg-white/70 backdrop-blur-sm sm:bg-transparent p-3 sm:p-0 rounded-2xl">
+          <div className="lg:absolute lg:right-0 lg:top-28 z-20 max-w-xl lg:max-w-[220px] mx-auto mb-6 lg:mb-0 text-center lg:text-right">
+            <p className="text-sm md:text-base text-stone-700 font-normal leading-relaxed bg-white/70 backdrop-blur-sm lg:bg-transparent p-3 lg:p-0 rounded-2xl">
               passionate about low-level memory efficiency, algorithmic rigor, and crafting intuitive software experiences that connect users with value.
             </p>
           </div>
@@ -98,6 +98,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <img
                 src="/assets/aistudio/file_0000000025508211a087065bea908f59_031c9fd3.png"
                 alt="Joydeep Sasmal - Software Engineer"
+                width={1110}
+                height={1424}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
                 className="w-[94%] h-auto object-cover object-top relative z-10 filter contrast-[1.03] brightness-[1.01] drop-shadow-xl select-none"
               />
 
