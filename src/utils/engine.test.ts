@@ -67,3 +67,25 @@ test('validateContactForm rejects empty/invalid data and accepts valid inputs', 
   assert.equal(valid.isValid, true);
   assert.equal(Object.keys(valid.errors).length, 0);
 });
+
+
+test('pathfinding takes a detour away from the goal without oscillating', () => {
+  const obstacles = new Set(['2,0', '2,1', '2,2', '2,3']);
+  let point = { x: 1, y: 1 };
+  const target = { x: 3, y: 1 };
+  const visited = new Set<string>();
+  for (let i = 0; i < 20 && (point.x !== target.x || point.y !== target.y); i++) {
+    const key = `${point.x},${point.y}`;
+    assert.ok(!visited.has(key), 'path must not revisit a cell');
+    visited.add(key);
+    point = findNextStepOnGrid(point, target, 5, 5, obstacles);
+  }
+  assert.deepEqual(point, target);
+});
+
+test('pathfinding stays put for unreachable or invalid targets', () => {
+  const start = { x: 0, y: 0 };
+  assert.deepEqual(findNextStepOnGrid(start, { x: 2, y: 2 }, 3, 3, new Set(['1,0', '0,1'])), start);
+  assert.deepEqual(findNextStepOnGrid(start, { x: 3, y: 2 }, 3, 3, new Set()), start);
+  assert.deepEqual(findNextStepOnGrid(start, { x: 2, y: 2 }, 3, 3, new Set(['2,2'])), start);
+});

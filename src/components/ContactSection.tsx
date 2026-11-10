@@ -17,8 +17,13 @@ export const ContactSection: React.FC = () => {
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [copiedEmail, setCopiedEmail] = useState<boolean>(false);
 
-  const handleCopyEmail = () => {
-    navigator.clipboard.writeText(PERSONAL_INFO.email);
+  const handleCopyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(PERSONAL_INFO.email);
+    } catch {
+      window.alert("Copy failed. Please select and copy the text manually.");
+      return;
+    }
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2500);
   };
@@ -81,7 +86,7 @@ export const ContactSection: React.FC = () => {
                 <div className="flex items-center justify-between gap-2">
                   <a
                     href={`mailto:${PERSONAL_INFO.email}`}
-                    className="text-sm font-mono font-bold text-stone-900 hover:text-emerald-700 transition"
+                    className="min-w-0 break-all text-sm font-mono font-bold text-stone-900 hover:text-emerald-700 transition"
                   >
                     {PERSONAL_INFO.email}
                   </a>
@@ -137,10 +142,10 @@ export const ContactSection: React.FC = () => {
                     <CheckCircle2 className="w-8 h-8" />
                   </div>
                   <h3 className="text-2xl font-bold font-sans text-stone-900">
-                    Thank You, {formData.name}!
+                    Your email draft is ready, {formData.name}!
                   </h3>
                   <p className="text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
-                    Your inquiry has been received. Joydeep reviews all recruiter queries and typically responds within 24 hours.
+                    Nothing has been sent yet. Open your mail app below, then review and send your message to Joydeep. If no mail app opens, use the direct email address.
                   </p>
                   <div className="pt-4 flex flex-wrap items-center justify-center gap-3">
                     <button
@@ -154,7 +159,7 @@ export const ContactSection: React.FC = () => {
                       onClick={() => setSubmitted(false)}
                       className="px-5 py-3 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium cursor-pointer"
                     >
-                      Send Another Message
+                      Edit Message
                     </button>
                   </div>
                 </div>
@@ -188,12 +193,14 @@ export const ContactSection: React.FC = () => {
                   {/* Name and Email Grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold text-stone-700 mb-1">
+                      <label htmlFor="contact-name" className="block text-xs font-semibold text-stone-700 mb-1">
                         Your Full Name *
                       </label>
                       <div className="relative">
                         <input
                           type="text"
+                          id="contact-name"
+                          name="name"
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                           placeholder="e.g. Alex Morgan"
@@ -210,12 +217,14 @@ export const ContactSection: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-stone-700 mb-1">
+                      <label htmlFor="contact-email" className="block text-xs font-semibold text-stone-700 mb-1">
                         Work Email *
                       </label>
                       <input
                         type="email"
-                        value={formData.email}
+                        id="contact-email"
+                          name="email"
+                          value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         placeholder="e.g. alex@company.com"
                         className={`w-full px-4 py-2.5 rounded-xl border text-sm transition focus:outline-none focus:ring-2 ${
@@ -232,12 +241,14 @@ export const ContactSection: React.FC = () => {
 
                   {/* Company */}
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    <label htmlFor="contact-company" className="block text-xs font-semibold text-stone-700 mb-1">
                       Company / Organization (Optional)
                     </label>
                     <input
                       type="text"
-                      value={formData.company}
+                      id="contact-company"
+                          name="company"
+                          value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                       placeholder="e.g. Stripe, DeepMind, or Startup"
                       className="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -246,12 +257,14 @@ export const ContactSection: React.FC = () => {
 
                   {/* Message */}
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    <label htmlFor="contact-message" className="block text-xs font-semibold text-stone-700 mb-1">
                       Message & Role Details *
                     </label>
                     <textarea
                       rows={4}
-                      value={formData.message}
+                      id="contact-message"
+                          name="message"
+                          value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       placeholder="Describe the opportunity, engineering role, or technical challenge..."
                       className={`w-full px-4 py-2.5 rounded-xl border text-sm transition focus:outline-none focus:ring-2 ${
@@ -272,7 +285,7 @@ export const ContactSection: React.FC = () => {
                       className="w-full py-3.5 px-6 rounded-full bg-stone-900 hover:bg-black text-white font-medium text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer group"
                     >
                       <Send className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-                      <span>Send Message to Joydeep</span>
+                      <span>Prepare Email Draft</span>
                     </button>
                   </div>
                 </form>
@@ -284,3 +297,4 @@ export const ContactSection: React.FC = () => {
     </section>
   );
 };
+

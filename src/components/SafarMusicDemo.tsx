@@ -64,6 +64,7 @@ export const SafarMusicDemo: React.FC<SafarMusicDemoProps> = ({ onOpenDoc }) => 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const synthesisNodesRef = useRef<AudioNode[]>([]);
   const activeOscsRef = useRef<OscillatorNode[]>([]);
   const animFrameRef = useRef<number | null>(null);
 
@@ -80,6 +81,8 @@ export const SafarMusicDemo: React.FC<SafarMusicDemoProps> = ({ onOpenDoc }) => 
       }
     }
     activeOscsRef.current = [];
+    synthesisNodesRef.current.forEach((node) => node.disconnect());
+    synthesisNodesRef.current = [];
   };
 
   // Start synthesizing ambient chords with warm soothing detune
@@ -113,6 +116,7 @@ export const SafarMusicDemo: React.FC<SafarMusicDemoProps> = ({ onOpenDoc }) => 
     filter.type = 'lowpass';
     filter.frequency.setValueAtTime(750, ctx.currentTime);
     filter.connect(gainNodeRef.current);
+    synthesisNodesRef.current.push(filter);
 
     // Pick chord frequencies for this track
     const chord = currentTrack.chords[elapsedSecs % currentTrack.chords.length];
@@ -136,6 +140,7 @@ export const SafarMusicDemo: React.FC<SafarMusicDemoProps> = ({ onOpenDoc }) => 
       osc1.connect(chordGain);
       osc2.connect(chordGain);
       chordGain.connect(filter);
+      synthesisNodesRef.current.push(chordGain);
 
       osc1.start();
       osc2.start();
@@ -151,7 +156,6 @@ export const SafarMusicDemo: React.FC<SafarMusicDemoProps> = ({ onOpenDoc }) => 
       stopSynthesis();
       setIsPlaying(false);
     } else {
-      startSynthesis();
       setIsPlaying(true);
     }
   };
@@ -160,19 +164,28 @@ export const SafarMusicDemo: React.FC<SafarMusicDemoProps> = ({ onOpenDoc }) => 
     stopSynthesis();
     setCurrentTrackIndex((prev) => (prev + 1) % TRACKS.length);
     setElapsedSecs(0);
-    if (isPlaying) {
-      setTimeout(startSynthesis, 50);
-    }
+
   };
 
   const handlePrev = () => {
     stopSynthesis();
     setCurrentTrackIndex((prev) => (prev - 1 + TRACKS.length) % TRACKS.length);
     setElapsedSecs(0);
-    if (isPlaying) {
-      setTimeout(startSynthesis, 50);
-    }
+
   };
+
+  // Start audio after React commits the selected track. Visualizer cleanup
+  // must never stop newly started audio.
+  useEffect(() => {
+    if (isPlaying) startSynthesis();
+    return stopSynthesis;
+  }, [isPlaying, currentTrackIndex]);
+
+  useEffect(() => () => {
+    stopSynthesis();
+    void audioCtxRef.current?.close();
+    audioCtxRef.current = null;
+  }, []);
 
   // Update volume
   useEffect(() => {
@@ -243,7 +256,6 @@ export const SafarMusicDemo: React.FC<SafarMusicDemoProps> = ({ onOpenDoc }) => 
 
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-      stopSynthesis();
     };
   }, [isPlaying]);
 
@@ -425,3 +437,4 @@ export const SafarMusicDemo: React.FC<SafarMusicDemoProps> = ({ onOpenDoc }) => 
     </div>
   );
 };
+
